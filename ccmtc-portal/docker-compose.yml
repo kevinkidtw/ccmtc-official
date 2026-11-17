@@ -1,0 +1,122 @@
+version: '3.8'
+
+services:
+  portal:
+    build: .
+    container_name: ccmtc-portal
+    restart: unless-stopped
+    user: "0:0"
+    ports:
+      - "3040:3040"
+    environment:
+      - DATABASE_URL=file:/app/data/dev.db
+      - SITE_URL=https://ccmtc.mooo.com
+      - ADMIN_TOKEN=${ADMIN_TOKEN:?ADMIN_TOKEN 未設定，請確認同目錄的 .env}
+      - RESULTS_URL=/results
+      # 魷來魷去 AI 教材站的通行碼（伺服器端驗證，見 src/middleware.js）。
+      # 只有一組共用通行碼，沒有帳號。值只寫在 NAS 的 .env，不進原始碼也不進 git。
+      # 刻意用寬鬆預設：漏設時只有 /squid 回 503，不會讓整個 compose 起不來、
+      # 連帶把已經在跑的主站弄掛。middleware 沒讀到值就不放行。
+      - SQUID_PASS=${SQUID_PASS:-}
+      - ROBOT_PASS=${ROBOT_PASS:-}
+      - R4M_PASS=${R4M_PASS:-}
+    volumes:
+      - ./data:/app/data
+      - ./uploads:/app/public/uploads
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # 成果發佈中心 (對應本地「ccmtc-results」目錄，遠端 NAS 資料夾為 ../ccmtc-results)
+  results:
+    build: ../ccmtc-results
+    container_name: ccmtc-results
+    restart: unless-stopped
+    user: "0:0"
+    expose:
+      - "3010"
+    environment:
+      - DATABASE_URL=file:/app/data/dev.db
+      - SITE_URL=https://ccmtc.mooo.com/results
+      - ADMIN_TOKEN=${ADMIN_TOKEN:?ADMIN_TOKEN 未設定，請確認同目錄的 .env}
+    volumes:
+      - ../ccmtc-results/data:/app/data
+      - ../ccmtc-results/uploads:/app/public/uploads
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # 競賽管理系統（ccmtc-competition）已於 2026-11-18 封存下線：
+  # /competition 改由 guides 容器內的凍結鏡像提供（ccmtc-guides/archives/competition）。
+  # 程式與資料庫保留在 NAS 的 ../ccmtc-competition，備份見 ../ccmtc-backups-safety/。
+
+  # 魷來魷去 AI 教材站（對應 NAS 的 ../squid-portal，純靜態 nginx）
+  # 刻意不開對外埠：只在 compose 內網 expose，一律經 portal 的 /squid 進來，
+  # 才會被 middleware 的 Basic Auth 擋一次。
+  squid:
+    image: nginx:alpine
+    container_name: squid-portal
+    restart: unless-stopped
+    expose:
+      - "80"
+    volumes:
+      - ../squid-portal/site:/usr/share/nginx/html:ro
+      - ../squid-portal/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # 智創機器人程式說明站（對應 NAS 的 ../robot-guide，純靜態 nginx）
+  robot:
+    image: nginx:alpine
+    container_name: robot-guide
+    restart: unless-stopped
+    expose:
+      - "80"
+    volumes:
+      - ../robot-guide/site:/usr/share/nginx/html:ro
+      - ../robot-guide/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # 機關王 R4M 程式說明站（對應 NAS 的 ../r4m-guide，純靜態 nginx）
+  r4m:
+    image: nginx:alpine
+    container_name: r4m-guide
+    restart: unless-stopped
+    expose:
+      - "80"
+    volumes:
+      - ../r4m-guide/site:/usr/share/nginx/html:ro
+      - ../r4m-guide/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # 官網共用靜態說明站（對應 NAS 的 ../ccmtc-guides，純靜態 nginx）
+  # 每站一個資料夾，路徑由 portal 的 src/config/sites.mjs 決定（第一個是 /drone/）。
+  guides:
+    image: nginx:alpine
+    container_name: ccmtc-guides
+    restart: unless-stopped
+    expose:
+      - "80"
+    volumes:
+      - ../ccmtc-guides/site:/usr/share/nginx/html:ro
+      - ../ccmtc-guides/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

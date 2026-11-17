@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  portal:
+    build:
+      context: .
+      dockerfile: Dockerfile.deploy
+    container_name: ccmtc-portal
+    restart: unless-stopped
+    user: "0:0"
+    ports:
+      - "3040:3040"
+    environment:
+      - DATABASE_URL=file:/app/data/dev.db
+      - SITE_URL=https://ccmtc.mooo.com
+      - ADMIN_TOKEN=${ADMIN_TOKEN:?ADMIN_TOKEN 未設定，請確認同目錄的 .env}
+      - RESULTS_URL=http://localhost:3010
+      - SCORING_URL=http://localhost:3020
+      - COMPETITION_URL=http://localhost:3030
+    volumes:
+      - ./data:/app/data
+      - ./uploads:/app/public/uploads
+

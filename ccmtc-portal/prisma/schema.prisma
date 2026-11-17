@@ -1,0 +1,40 @@
+datasource db {
+  provider = "sqlite"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  category  String   @default("一般公告")
+  isPinned  Boolean  @default(false)
+  fileUrl   String?
+  fileName  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CourseResource {
+  id          String   @id @default(cuid())
+  courseName  String
+  title       String
+  type        String   @default("附件")
+  fileUrl     String?
+  fileName    String?
+  externalUrl String?
+  note        String?
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Counter {
+  id        String   @id @default(cuid())
+  site      String   @unique
+  count     Int      @default(0)
+  updatedAt DateTime @updatedAt
+}

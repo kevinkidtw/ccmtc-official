@@ -1,0 +1,26 @@
+FROM node:20-alpine
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+# Copy pre-built standalone output (built on local machine)
+COPY .next/standalone ./
+COPY .next/static ./.next/static
+COPY public ./public
+COPY prisma ./prisma
+
+# Prisma runtime dependencies (pre-built locally)
+COPY node_modules/.prisma ./node_modules/.prisma
+COPY node_modules/@prisma ./node_modules/@prisma
+COPY node_modules/better-sqlite3 ./node_modules/better-sqlite3
+COPY node_modules/@prisma/adapter-better-sqlite3 ./node_modules/@prisma/adapter-better-sqlite3
+
+COPY start.sh migrate.js ./
+RUN chmod +x start.sh && cp dev.db dev.db.template 2>/dev/null || true
+RUN mkdir -p /app/data
+
+EXPOSE 3040
+ENV PORT=3040
+ENV HOSTNAME="0.0.0.0"
+ENV DATABASE_URL="file:/app/data/dev.db"
+
+CMD ["sh", "start.sh"]
