@@ -29,6 +29,7 @@
  *   access     'register' 表示由站台自己要求註冊登入（官網只負責標示）
  *              —— cookie 名稱與 signMessage 一經上線就不要改，否則使用者手上的 cookie 會全部失效。
  *   kicker     登入頁上方的小字（單位 · 賽事）
+ *   listed     false 表示不列在競賽專區（網址照常可開，例如只供最新消息連結的榮譽榜）
  */
 export const SITES = [
   {
@@ -60,6 +61,7 @@ export const SITES = [
     year: '115',
     status: 'active',
     desc: '115.11.20–21 南州國中：屏南 7 校 79 項次獲獎（金 2、銀 1、銅 3）。足球、穿環、程控、虛擬飛行四項賽事完整名單，可依學校與組別篩選，附海報下載。',
+    listed: false, // 2026-11-23 只以最新消息公告發布，不列在競賽專區；網址保留給公告連結與海報
     upstream: 'guides',
     auth: null,
   },
@@ -172,7 +174,7 @@ export const ROLES = [
 /** 依角色分區，每區再依年度分組；沒有站的區塊不回傳。 */
 export function groupByRole(list = SITES) {
   return ROLES
-    .map(role => [role, groupByYear(list.filter(s => s.role === role.key))])
+    .map(role => [role, groupByYear(list.filter(s => s.role === role.key && s.listed !== false))])
     .filter(([, groups]) => groups.length > 0);
 }
 

@@ -148,7 +148,8 @@ test('groupByRole：中心辦理在前，各區依年度分組', () => {
   const sections = groupByRole();
   assert.deepEqual(sections.map(([r]) => r.key), ['host', 'team']);
   const [, hostGroups] = sections[0];
-  assert.deepEqual(hostGroups.map(([y]) => y), ['115', '114']);
+  assert.deepEqual(hostGroups.map(([y]) => y), ['114'], 'drone-awards 為 listed:false，不列在競賽專區');
+  assert.ok(!sections.flatMap(([, g]) => g.flatMap(([, ss]) => ss)).some(s => s.key === 'drone-awards'));
   assert.equal(groupByRole([{ key: 'x', role: 'team', year: '115', status: 'active' }]).length, 1, '空的區塊不輸出');
 });
 
