@@ -6,7 +6,7 @@ import {
 } from '../src/lib/teacherAuth.mjs';
 import {
   escapeHtml, renderPlainText, renderContent, excerpt, isAllowedUpload, isUploadUrl, validatePost,
-  displayDate, NEWS_CATEGORIES,
+  displayDate, NEWS_CATEGORIES, recentNewsBySite,
 } from '../src/lib/newsFormat.mjs';
 
 test('密碼：雜湊不含明文、驗證正確、加鹽', () => {
@@ -131,4 +131,22 @@ test('validatePost：必填、長度、分類、站台、附件；不接受置�
   assert.ok(!validatePost({ title: 'x', content: 'x', fileUrl: 'https://evil.com/a.pdf' }).ok);
   assert.ok(validatePost({ title: 'x', content: 'x', fileUrl: '/api/uploads/1-a.pdf', fileName: 'a.pdf' }).ok);
   assert.equal(NEWS_CATEGORIES.length, 4);
+});
+
+test('NEW 徽章：每站取 30 天內最新一則已發布、有綁站的消息', () => {
+  const now = Date.UTC(2026, 10, 23);
+  const day = 864e5;
+  const at = d => new Date(now - d * day).toISOString();
+  const m = recentNewsBySite([
+    { id: 'a', title: '舊', siteKey: 'drone', status: 'published', publishedAt: at(10) },
+    { id: 'b', title: '新', siteKey: 'drone', status: 'published', publishedAt: at(2) },
+    { id: 'c', title: '過期', siteKey: 'robot', status: 'published', publishedAt: at(31) },
+    { id: 'd', title: '待審', siteKey: 'r4m', status: 'pending', publishedAt: null, createdAt: at(1) },
+    { id: 'e', title: '沒綁站', siteKey: null, status: 'published', publishedAt: at(1) },
+    { id: 'f', title: '舊資料沒 publishedAt', siteKey: 'squid', status: 'published', publishedAt: null, createdAt: at(3) },
+  ], now, 30);
+  assert.deepEqual(Object.keys(m).sort(), ['drone', 'squid']);
+  assert.equal(m.drone.id, 'b');
+  assert.equal(m.squid.id, 'f');
+  assert.deepEqual(recentNewsBySite(null, now), {});
 });

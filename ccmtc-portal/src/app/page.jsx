@@ -1,10 +1,10 @@
-import { getHomeNews } from '@/lib/newsQuery';
+import { getLatestNews, getRecentSiteNews } from '@/lib/newsQuery';
 import NavBar from './components/NavBar';
 import HeroSection from './components/HeroSection';
 import QuickAccess from './components/QuickAccess';
 import AboutSection from './components/AboutSection';
 import CoursesSection from './components/CoursesSection';
-import AnnouncementList from './components/AnnouncementList';
+import NewsStrip from './components/NewsStrip';
 import ServiceArea from './components/ServiceArea';
 import ContactSection from './components/ContactSection';
 import Footer from './components/Footer';
@@ -17,12 +17,11 @@ export default async function HomePage() {
   const resultsUrl = process.env.RESULTS_URL || 'http://localhost:3010';
   // 說明站、教材站、資科訓練的入口改由 src/config/sites.mjs 統一管理
 
-  let announcements = [];
-  let newsTotal = 0;
+  // 卡片＝長期入口；消息＝有日期的事件。首頁只放最新 3 則標題，卡片用 NEW 徽章連到相關消息。
+  let latest = { items: [], total: 0 };
+  let siteNews = {};
   try {
-    const home = await getHomeNews();
-    announcements = home.items;
-    newsTotal = home.total;
+    [latest, siteNews] = await Promise.all([getLatestNews(3), getRecentSiteNews()]);
   } catch {
     // DB not ready yet, show empty state
   }
@@ -33,7 +32,10 @@ export default async function HomePage() {
       <HeroSection />
       <QuickAccess
         resultsUrl={resultsUrl}
+        siteNews={siteNews}
       />
+
+      <NewsStrip items={latest.items} total={latest.total} />
 
       <div style={{ padding: '4rem 0 0' }} />
       <div className="section-divider" />
@@ -43,10 +45,6 @@ export default async function HomePage() {
       <div className="section-divider" />
 
       <CoursesSection />
-
-      <div className="section-divider" />
-
-      <AnnouncementList announcements={announcements} total={newsTotal} />
 
       <div className="section-divider" />
 

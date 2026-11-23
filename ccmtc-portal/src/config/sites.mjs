@@ -22,7 +22,8 @@
  *   category   'competition'（競賽）| 'material'（教材）| 'training'（訓練）
  *   year       學年度或賽事年度標籤，競賽專區依此分組（字串）
  *   status     'active' 進行中 | 'archived' 已封存（只出現在競賽專區的「歷屆」區）
- *   featured   true 才會出現在首頁快速入口
+ *   featured   true 才會出現在首頁快速入口。只給「整學年都會用到」的入口（說明站、教材站）；
+ *              榮譽榜、成果頁這類一次性內容請設 false，改發最新消息並綁定 siteKey。
  *   upstream   'guides'（共用靜態容器 ccmtc-guides）
  *              | { service, port, envVar, devPort }（舊的獨立容器，逐步遷入 guides）
  *              | { href }（外部或其他路由處理的網址，官網只放連結）
@@ -61,7 +62,7 @@ export const SITES = [
     category: 'competition',
     year: '115',
     status: 'active',
-    featured: true,
+    featured: false, // 一次性成果頁：以最新消息宣傳，網站收在競賽專區（2026-11-23）
     desc: '115.11.20–21 南州國中：屏南 7 校 79 項次獲獎（金 2、銀 1、銅 3）。足球、穿環、程控、虛擬飛行四項賽事完整名單，可依學校與組別篩選，附海報下載。',
     upstream: 'guides',
     auth: null,

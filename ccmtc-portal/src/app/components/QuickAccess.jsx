@@ -1,6 +1,7 @@
 import { SITES, siteHref, accessLabel } from '@/config/sites.mjs';
+import CardNewsBadge from './CardNewsBadge';
 
-export default function QuickAccess({ resultsUrl }) {
+export default function QuickAccess({ resultsUrl, siteNews = {} }) {
   // 第一列：中心的三個主要入口；其下為各說明站（依站台清單順序）。
   // 格線一列 3 張：共 8 張時寬螢幕為 3＋3＋2、平板為 2×4，不會只剩一張落單。
   const hubs = [
@@ -36,6 +37,7 @@ export default function QuickAccess({ resultsUrl }) {
     desc: accessLabel(site) ? `${site.desc}${accessLabel(site)}。` : site.desc,
     linkLabel: '進入網站',
     href: siteHref(site),
+    news: siteNews[site.key],
     sameTab: true,
   }));
 
@@ -45,8 +47,8 @@ export default function QuickAccess({ resultsUrl }) {
     <div className="quick-access-wrapper animate-up">
       <div className="quick-access-grid">
         {cards.map((card) => (
+          <CardNewsBadge key={card.title} news={card.news}>
           <a
-            key={card.title}
             href={card.href}
             target={card.sameTab ? undefined : '_blank'}
             rel={card.sameTab ? undefined : 'noopener noreferrer'}
@@ -60,6 +62,7 @@ export default function QuickAccess({ resultsUrl }) {
               <span className="access-arrow">→</span>
             </span>
           </a>
+          </CardNewsBadge>
         ))}
       </div>
     </div>

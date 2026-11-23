@@ -126,6 +126,11 @@ test('siteHref 與內部主機判斷', () => {
   assert.equal(siteHref(getSite('drone-awards')), '/drone-awards/');
 });
 
+test('一次性成果頁不上首頁卡片（以最新消息宣傳）', () => {
+  assert.equal(getSite('drone-awards').featured, false);
+  assert.equal(getSite('drone-awards').status, 'active', '仍在競賽專區當作進行中的站顯示');
+});
+
 test('封存站：保留網址、不上首頁、不需登入', () => {
   const c = getSite('competition');
   assert.equal(c.status, 'archived');

@@ -960,3 +960,42 @@ body {
   transform: translateY(-1.5px);
   box-shadow: 0 4px 12px rgba(24, 119, 242, 0.25);
 }
+
+/* ── 卡片 NEW 徽章（2026-11-23）：卡片是入口，徽章連到該站最近的消息 ── */
+.card-wrap { position: relative; display: flex; min-width: 0; }
+.card-wrap > .access-card { flex: 1; min-width: 0; }
+.card-news-badge {
+  position: absolute; top: 12px; right: 12px; z-index: 2;
+  font-size: 0.72rem; font-weight: 800; letter-spacing: 0.02em;
+  padding: 4px 10px; border-radius: 999px; text-decoration: none;
+  background: #ef4444; color: #fff; box-shadow: 0 4px 12px rgba(239,68,68,0.35);
+}
+.card-news-badge:hover { background: #dc2626; }
+
+/* ── 首頁精簡消息條（取代原本的展開式公告區）── */
+.news-strip {
+  max-width: 1100px; margin: 2.5rem auto 0; padding: 1.25rem 1.5rem 1rem;
+  background: #fff; border-radius: 20px; box-shadow: 0 8px 30px rgba(31,38,135,0.08);
+  width: calc(100% - 3rem);
+}
+.news-strip-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 0.5rem; }
+.news-strip-head h2 { font-size: 1.15rem; font-weight: 900; margin: 0; }
+.news-strip-more { font-weight: 800; font-size: 0.9rem; color: var(--theme-dark); text-decoration: none; white-space: nowrap; }
+.news-strip-list { list-style: none; margin: 0; padding: 0; }
+.news-strip-list li { border-top: 1px solid #f1f5f9; }
+.news-strip-list a {
+  display: flex; align-items: center; gap: 0.75rem; padding: 0.7rem 0.25rem;
+  text-decoration: none; color: inherit; border-radius: 8px;
+}
+.news-strip-list a:hover { background: var(--theme-lighter); }
+.news-strip-date { font-size: 0.82rem; color: var(--text-muted); font-variant-numeric: tabular-nums; flex: none; }
+.news-strip-list .news-cat-badge { flex: none; }
+.news-strip-title { font-weight: 700; font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.news-strip-empty { color: var(--text-muted); margin: 0.5rem 0; }
+.news-strip-foot { margin-top: 0.5rem; padding-top: 0.6rem; border-top: 1px dashed #e2e8f0; font-size: 0.82rem; color: var(--text-muted); }
+.news-strip-foot a { font-weight: 800; color: var(--theme-dark); }
+@media (max-width: 600px) {
+  .news-strip { width: calc(100% - 2rem); padding: 1rem; }
+  .news-strip-list a { flex-wrap: wrap; gap: 0.4rem 0.6rem; }
+  .news-strip-title { white-space: normal; flex-basis: 100%; }
+}

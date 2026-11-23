@@ -63,6 +63,23 @@ export function displayDate(item) {
   return item?.publishedAt || item?.createdAt;
 }
 
+/**
+ * 首頁／競賽專區卡片的「NEW」徽章：每個站取 days 天內最新一則有綁定該站的已發布消息。
+ * 卡片是長期入口、消息是有日期的事件；徽章把兩者串起來，不必為了宣傳多開一張卡片。
+ */
+export function recentNewsBySite(items, now = Date.now(), days = 30) {
+  const cutoff = now - days * 24 * 60 * 60 * 1000;
+  const out = {};
+  for (const it of items || []) {
+    if (!it?.siteKey || it.status !== STATUS.PUBLISHED) continue;
+    const t = new Date(displayDate(it)).getTime();
+    if (!(t >= cutoff) || t > now + 60 * 1000) continue;
+    const prev = out[it.siteKey];
+    if (!prev || t > prev.time) out[it.siteKey] = { id: it.id, title: it.title, time: t };
+  }
+  return out;
+}
+
 /** 可以綁定的站台（有自己網址的說明站、榮譽榜等）。 */
 export function linkableSites(list = SITES) {
   return list.map(s => ({ key: s.key, title: s.title, short: s.short, icon: s.icon }));

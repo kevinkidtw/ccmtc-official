@@ -2,6 +2,8 @@ import NavBar from '../components/NavBar';
 import Footer from '../components/Footer';
 import ScrollAnimInit from '../components/ScrollAnimInit';
 import { SITES, groupByRole, siteHref, accessLabel, badgeLabel } from '@/config/sites.mjs';
+import CardNewsBadge from '../components/CardNewsBadge';
+import { getRecentSiteNews } from '@/lib/newsQuery';
 
 // 頁尾連結讀執行期環境變數，不能在建置時靜態化
 export const dynamic = 'force-dynamic';
@@ -33,9 +35,11 @@ const css = `
 .contest-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.25rem}
 `;
 
-export default function ContestsPage() {
+export default async function ContestsPage() {
   const resultsUrl = process.env.RESULTS_URL || 'http://localhost:3010';
   const sections = groupByRole(SITES);
+  let siteNews = {};
+  try { siteNews = await getRecentSiteNews(); } catch { /* 資料庫未就緒就不顯示徽章 */ }
 
   return (
     <>
@@ -77,8 +81,8 @@ export default function ContestsPage() {
                 </h3>
                 <div className="contest-grid">
                   {sites.map(s => (
+                    <CardNewsBadge key={s.key} news={siteNews[s.key]}>
                     <a
-                      key={s.key}
                       href={siteHref(s)}
                       className={`access-card${s.status === 'archived' ? ' is-archived' : ''}`}
                     >
@@ -97,6 +101,7 @@ export default function ContestsPage() {
                         <span className="access-arrow">→</span>
                       </span>
                     </a>
+                    </CardNewsBadge>
                   ))}
                 </div>
               </div>
