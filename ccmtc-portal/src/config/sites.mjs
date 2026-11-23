@@ -22,8 +22,6 @@
  *   category   'competition'（競賽）| 'material'（教材）| 'training'（訓練）
  *   year       學年度或賽事年度標籤，競賽專區依此分組（字串）
  *   status     'active' 進行中 | 'archived' 已封存（只出現在競賽專區的「歷屆」區）
- *   featured   true 才會出現在首頁快速入口。只給「整學年都會用到」的入口（說明站、教材站）；
- *              榮譽榜、成果頁這類一次性內容請設 false，改發最新消息並綁定 siteKey。
  *   upstream   'guides'（共用靜態容器 ccmtc-guides）
  *              | { service, port, envVar, devPort }（舊的獨立容器，逐步遷入 guides）
  *              | { href }（外部或其他路由處理的網址，官網只放連結）
@@ -44,7 +42,6 @@ export const SITES = [
     category: 'competition',
     year: '115',
     status: 'active',
-    featured: true,
     desc: '115 學年度屏東縣無人機競賽：Gigo Drone 程控任務賽公版程式、互動飛行模擬器、可調參數速查與上場前檢查清單，附程式與簡章下載。',
     upstream: 'guides',
     auth: null,
@@ -62,7 +59,6 @@ export const SITES = [
     category: 'competition',
     year: '115',
     status: 'active',
-    featured: false, // 一次性成果頁：以最新消息宣傳，網站收在競賽專區（2026-11-23）
     desc: '115.11.20–21 南州國中：屏南 7 校 79 項次獲獎（金 2、銀 1、銅 3）。足球、穿環、程控、虛擬飛行四項賽事完整名單，可依學校與組別篩選，附海報下載。',
     upstream: 'guides',
     auth: null,
@@ -77,7 +73,6 @@ export const SITES = [
     category: 'competition',
     year: '115',
     status: 'active',
-    featured: true,
     desc: '2026 全國 AI 智創機器人競賽：發射與夾爪含全國賽自動化，賽前清單、搖桿配對、P1～P7 調參、狀態機與程式下載。',
     upstream: 'guides', // 2026-11-23 由獨立容器併入 ccmtc-guides
     // 2026-11 起公開。若要恢復通行碼：{ envVar: 'ROBOT_PASS', cookie: 'robot_pass', signMessage: 'robot-guide-v1' }
@@ -94,7 +89,6 @@ export const SITES = [
     category: 'competition',
     year: '115',
     status: 'active',
-    featured: true,
     desc: '2027 世界機關王 R4M 基礎組：A／B 車 KSB 搖桿與手機 V7RC 遙控、配對步驟，C 車循跡取料與參數校正。',
     upstream: 'guides', // 2026-11-23 由獨立容器併入 ccmtc-guides
     // 2026-11 起公開。若要恢復通行碼：{ envVar: 'R4M_PASS', cookie: 'r4m_pass', signMessage: 'r4m-guide-v1' }
@@ -111,7 +105,6 @@ export const SITES = [
     category: 'material',
     year: '115',
     status: 'active',
-    featured: true,
     desc: '115 年度總統盃 AI 素養爭霸賽教材。約 2100 場離線實測，從觀念到實作的完整教學資源。',
     upstream: 'guides', // 2026-11-23 由獨立容器併入 ccmtc-guides
     // 2026-11 起公開。若要恢復通行碼：{ envVar: 'SQUID_PASS', cookie: 'squid_pass', signMessage: 'squid-portal-v1' }
@@ -129,7 +122,6 @@ export const SITES = [
     category: 'competition',
     year: '114',
     status: 'archived',
-    featured: false,
     desc: '屏南地區 118 隊參賽：恆春半島認知大作戰、洋蔥分類大作戰、智創機器人奪標攻防賽。保留競賽簡章、報名隊伍、抽籤順序與最終成績。',
     // 2026-11 封存：原 ccmtc-competition（Next.js + SQLite）下線，改為 ccmtc-guides 內的凍結鏡像。
     upstream: 'guides',
@@ -145,7 +137,6 @@ export const SITES = [
     category: 'training',
     year: '115',
     status: 'active',
-    featured: true,
     desc: '國中小程式解題訓練。從零開始的學習地圖（48 題入門題）一路銜接 114 學年 102 題競賽題庫，Blockly／Scratch 雙平台，每題附參考解答。',
     // 由 ccmtc-router 在官網外層分流，官網只放連結、不經過 middleware。
     upstream: { href: '/資科競賽訓練/' },

@@ -38,12 +38,6 @@ export default function HeroSection() {
           <a href="#about" className="hero-cta-primary">
             了解更多 ↓
           </a>
-          <a
-            href="/contests"
-            className="hero-cta-secondary"
-          >
-            🏆 競賽專區
-          </a>
         </div>
       </div>
 

@@ -1,9 +1,7 @@
-import { SITES, siteHref, accessLabel } from '@/config/sites.mjs';
 import CardNewsBadge from './CardNewsBadge';
 
 export default function QuickAccess({ resultsUrl, siteNews = {} }) {
-  // 第一列：中心的三個主要入口；其下為各說明站（依站台清單順序）。
-  // 格線一列 3 張：共 8 張時寬螢幕為 3＋3＋2、平板為 2×4，不會只剩一張落單。
+  // 首頁只放中心的三個主要入口；競賽說明站、教材站一律從「競賽專區」進入。
   const hubs = [
     {
       icon: '🗂️',
@@ -30,19 +28,11 @@ export default function QuickAccess({ resultsUrl, siteNews = {} }) {
     },
   ];
 
-  // 說明站／教材站卡片由站台清單產生（featured 且進行中的才上首頁）
-  const guides = SITES.filter(site => site.featured && site.status !== 'archived').map(site => ({
-    icon: site.icon,
-    title: site.title,
-    desc: accessLabel(site) ? `${site.desc}${accessLabel(site)}。` : site.desc,
-    linkLabel: '進入網站',
-    href: siteHref(site),
-    news: siteNews[site.key],
-    sameTab: true,
-  }));
-
-  const cards = [...hubs, ...guides];
-
+  // 說明站、教材站、榮譽榜都收在競賽專區，首頁不再逐站放卡片（2026-11-23）。
+  // 任何站有 30 天內綁定的新消息時，「競賽專區」卡片顯示 NEW 徽章，連到最新那一則。
+  const newest = Object.values(siteNews).sort((a, b) => b.time - a.time)[0];
+  hubs[0].news = newest;
+  const cards = hubs;
   return (
     <div className="quick-access-wrapper animate-up">
       <div className="quick-access-grid">
