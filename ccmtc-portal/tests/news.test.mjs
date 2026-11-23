@@ -149,4 +149,6 @@ test('NEW 徽章：每站取 30 天內最新一則已發布、有綁站的消息
   assert.equal(m.drone.id, 'b');
   assert.equal(m.squid.id, 'f');
   assert.deepEqual(recentNewsBySite(null, now), {});
+  assert.deepEqual(recentNewsBySite([{ id: 'x', siteKey: 'drone-awards', status: 'published', publishedAt: at(1) }], now), {},
+    'listed:false 的站不產生徽章');
 });

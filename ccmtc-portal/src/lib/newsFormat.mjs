@@ -72,6 +72,8 @@ export function recentNewsBySite(items, now = Date.now(), days = 30) {
   const out = {};
   for (const it of items || []) {
     if (!it?.siteKey || it.status !== STATUS.PUBLISHED) continue;
+    // 不列在競賽專區的站（listed: false，例如只靠消息發布的榮譽榜）沒有卡片可掛徽章
+    if (getSite(it.siteKey)?.listed === false) continue;
     const t = new Date(displayDate(it)).getTime();
     if (!(t >= cutoff) || t > now + 60 * 1000) continue;
     const prev = out[it.siteKey];
