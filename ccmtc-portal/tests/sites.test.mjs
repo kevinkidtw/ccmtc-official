@@ -38,22 +38,27 @@ test('資科訓練保留註冊登入（由 ccmtc-router 處理）', () => {
   assert.equal(accessLabel(getSite('squid')), null);
 });
 
-test('rewrite：guides 站導到共用容器的子資料夾、舊站維持原容器', () => {
+test('rewrite：所有靜態站都導到 guides 共用容器的子資料夾', () => {
   const prod = buildRewrites({ guidesUrl: 'http://guides:80', isDev: false, env: {} });
   const by = Object.fromEntries(prod.map(r => [r.source, r.destination]));
   assert.equal(by['/drone/'], 'http://guides:80/drone/', '站首頁要帶結尾斜線，否則無限 301');
   assert.equal(by['/drone/:path+'], 'http://guides:80/drone/:path+');
-  assert.equal(by['/robot/:path*'], 'http://robot:80/:path*');
-  assert.equal(by['/r4m/:path*'], 'http://r4m:80/:path*');
-  assert.equal(by['/squid/:path*'], 'http://squid:80/:path*');
+  // 2026-11-23 robot／r4m／squid 由獨立容器併入 guides
+  for (const k of ['robot', 'r4m', 'squid']) {
+    assert.equal(by[`/${k}/`], `http://guides:80/${k}/`);
+    assert.equal(by[`/${k}/:path+`], `http://guides:80/${k}/:path+`);
+  }
+  assert.ok(!Object.values(by).some(v => /\/\/(robot|r4m|squid):80/.test(v)), '不應再指向舊容器');
   assert.ok(!Object.keys(by).some(k => k.includes('資科')), '外部連結站不應產生 rewrite');
   assert.equal(by['/competition/'], 'http://guides:80/competition/', '屏南區競賽改由封存鏡像提供');
   assert.equal(by['/competition/:path+'], 'http://guides:80/competition/:path+');
+});
 
-  const dev = buildRewrites({ guidesUrl: 'http://127.0.0.1:3100', isDev: true, env: { ROBOT_PROXY_URL: 'http://x:1' } });
-  const d = Object.fromEntries(dev.map(r => [r.source, r.destination]));
-  assert.equal(d['/robot/:path*'], 'http://x:1/:path*');
-  assert.equal(d['/r4m/:path*'], 'http://127.0.0.1:3090/:path*');
+test('rewrite：仍支援獨立容器型 upstream（環境變數覆寫、開發埠）', () => {
+  const legacy = [{ key: 'x', prefix: '/x', upstream: { service: 'xs', port: 80, envVar: 'X_PROXY_URL', devPort: 3999 } }];
+  assert.equal(buildRewrites({ guidesUrl: 'g', isDev: false, env: {} }, legacy)[0].destination, 'http://xs:80/:path*');
+  assert.equal(buildRewrites({ guidesUrl: 'g', isDev: true, env: {} }, legacy)[0].destination, 'http://127.0.0.1:3999/:path*');
+  assert.equal(buildRewrites({ guidesUrl: 'g', isDev: true, env: { X_PROXY_URL: 'http://y:1' } }, legacy)[0].destination, 'http://y:1/:path*');
 });
 
 test('getSiteByPath 嚴格比對前綴邊界', () => {

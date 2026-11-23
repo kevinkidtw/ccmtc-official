@@ -95,3 +95,4 @@ sudo docker-compose logs -f competition
 
 * **屏南區智創機器人競賽封存（2026-11-18）**：`ccmtc-competition` 容器已下線並移出 compose，`/competition/` 改由 `guides` 容器內的凍結鏡像提供（唯讀，網址不變，選手姓名遮蔽）。首頁的「競賽即時計分」「競賽資訊入口」卡片撤下，Hero 按鈕與頁尾改連競賽專區，競賽專區 114 學年度標示「已封存」。程式與資料庫保留在 NAS 的 `ccmtc-competition/`，備份在 `ccmtc-backups-safety/`。詳見 `../ccmtc-guides/README.md`「封存鏡像」。
 * **競賽專區分區（2026-11-18）**：`sites.mjs` 每站加上 `role`。`host`＝中心辦理的競賽（主辦或承辦，`hostType` 決定徽章「中心主辦／中心承辦」），`team`＝中心隊伍參賽用的培訓與程式說明。`/contests` 依此分成兩區，各區再依學年度分組。目前中心辦理：屏南區智創機器人競賽（主辦，已封存）；參賽培訓與程式說明：無人機（中心雖列承辦單位之一，但非主要角色）、智創機器人、機關王 R4M、魷來魷去、資科競賽訓練。新增站台時務必填 `role`（單元測試會檢查）。
+* **靜態容器合併（2026-11-23）**：`robot-guide`、`r4m-guide`、`squid-portal` 三個 nginx 容器併入 `guides`，`sites.mjs` 三站 `upstream` 改為 `'guides'`，compose 移除這三個服務。官網相關容器剩 `portal`、`results`、`guides` 三個。

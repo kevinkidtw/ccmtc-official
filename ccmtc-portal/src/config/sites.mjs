@@ -78,7 +78,7 @@ export const SITES = [
     status: 'active',
     featured: true,
     desc: '2026 全國 AI 智創機器人競賽：發射與夾爪含全國賽自動化，賽前清單、搖桿配對、P1～P7 調參、狀態機與程式下載。',
-    upstream: { service: 'robot', port: 80, envVar: 'ROBOT_PROXY_URL', devPort: 3080 },
+    upstream: 'guides', // 2026-11-23 由獨立容器併入 ccmtc-guides
     // 2026-11 起公開。若要恢復通行碼：{ envVar: 'ROBOT_PASS', cookie: 'robot_pass', signMessage: 'robot-guide-v1' }
     auth: null,
     kicker: '車城自造教育科技中心 · 2026 全國 AI 智創機器人競賽',
@@ -95,7 +95,7 @@ export const SITES = [
     status: 'active',
     featured: true,
     desc: '2027 世界機關王 R4M 基礎組：A／B 車 KSB 搖桿與手機 V7RC 遙控、配對步驟，C 車循跡取料與參數校正。',
-    upstream: { service: 'r4m', port: 80, envVar: 'R4M_PROXY_URL', devPort: 3090 },
+    upstream: 'guides', // 2026-11-23 由獨立容器併入 ccmtc-guides
     // 2026-11 起公開。若要恢復通行碼：{ envVar: 'R4M_PASS', cookie: 'r4m_pass', signMessage: 'r4m-guide-v1' }
     auth: null,
     kicker: '車城自造教育科技中心 · 2027 世界機關王 R4M 基礎組',
@@ -112,7 +112,7 @@ export const SITES = [
     status: 'active',
     featured: true,
     desc: '115 年度總統盃 AI 素養爭霸賽教材。約 2100 場離線實測，從觀念到實作的完整教學資源。',
-    upstream: { service: 'squid', port: 80, envVar: 'SQUID_PROXY_URL', devPort: 3070 },
+    upstream: 'guides', // 2026-11-23 由獨立容器併入 ccmtc-guides
     // 2026-11 起公開。若要恢復通行碼：{ envVar: 'SQUID_PASS', cookie: 'squid_pass', signMessage: 'squid-portal-v1' }
     auth: null,
     kicker: '車城國中 · 115 年度總統盃 AI 素養爭霸賽',
