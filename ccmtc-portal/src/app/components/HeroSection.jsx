@@ -34,11 +34,6 @@ export default function HeroSection() {
           </div>
         </div>
 
-        <div className="hero-cta">
-          <a href="#about" className="hero-cta-primary">
-            了解更多 ↓
-          </a>
-        </div>
       </div>
 
       <div className="scroll-hint" aria-hidden="true">
