@@ -117,7 +117,8 @@ test('siteHref 與內部主機判斷', () => {
   assert.equal(siteHref(getSite('training')), '/資科競賽訓練/');
   assert.ok(isInternalHost('guides:80'));
   assert.ok(!isInternalHost('ccmtc.mooo.com'));
-  assert.equal(proxiedSites().length, 5);
+  assert.equal(proxiedSites().length, 6);
+  assert.equal(siteHref(getSite('drone-awards')), '/drone-awards/');
 });
 
 test('封存站：保留網址、不上首頁、不需登入', () => {
@@ -136,20 +137,21 @@ test('每個站都有角色：中心辦理 vs 參賽培訓', () => {
   const keys = ROLES.map(r => r.key);
   for (const s of REGISTRY) assert.ok(keys.includes(s.role), `${s.key} role=${s.role}`);
   const hosted = REGISTRY.filter(s => s.role === 'host').map(s => s.key).sort();
-  assert.deepEqual(hosted, ['competition']);
+  assert.deepEqual(hosted, ['competition', 'drone-awards']);
 });
 
 test('groupByRole：中心辦理在前，各區依年度分組', () => {
   const sections = groupByRole();
   assert.deepEqual(sections.map(([r]) => r.key), ['host', 'team']);
   const [, hostGroups] = sections[0];
-  assert.deepEqual(hostGroups.map(([y]) => y), ['114']);
+  assert.deepEqual(hostGroups.map(([y]) => y), ['115', '114']);
   assert.equal(groupByRole([{ key: 'x', role: 'team', year: '115', status: 'active' }]).length, 1, '空的區塊不輸出');
 });
 
 test('徽章：中心辦理標主辦／承辦，其餘標類別', () => {
   assert.equal(badgeLabel(getSite('drone')), '競賽說明');
   assert.equal(badgeLabel(getSite('competition')), '中心主辦');
+  assert.equal(badgeLabel(getSite('drone-awards')), '中心承辦');
   assert.equal(badgeLabel(getSite('robot')), '競賽說明');
   assert.equal(badgeLabel(getSite('squid')), '教材');
 });

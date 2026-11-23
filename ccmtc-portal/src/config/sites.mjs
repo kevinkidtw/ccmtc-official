@@ -50,6 +50,23 @@ export const SITES = [
     kicker: '車城自造教育科技中心 · 115 學年度屏東縣無人機競賽',
   },
   {
+    key: 'drone-awards',
+    // 屏南地區得獎榮譽榜；中心列承辦單位之一，名單由中心彙整屏南學校成績。
+    role: 'host',
+    hostType: '承辦',
+    prefix: '/drone-awards',
+    title: '2026 屏東縣無人機競賽 屏南地區得獎榮譽榜',
+    short: '無人機競賽榮譽榜',
+    icon: '🏆',
+    category: 'competition',
+    year: '115',
+    status: 'active',
+    featured: true,
+    desc: '115.11.20–21 南州國中：屏南 7 校 79 項次獲獎（金 2、銀 1、銅 3）。足球、穿環、程控、虛擬飛行四項賽事完整名單，可依學校與組別篩選，附海報下載。',
+    upstream: 'guides',
+    auth: null,
+  },
+  {
     key: 'robot',
     role: 'team',
     prefix: '/robot',
