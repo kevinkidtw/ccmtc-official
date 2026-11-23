@@ -52,6 +52,7 @@ export async function GET(request, { params }) {
         'Content-Type': mimeType,
         'Content-Disposition': disposition,
         'Cache-Control': 'public, max-age=31536000, immutable',
+        'X-Content-Type-Options': 'nosniff',
       },
     });
   } catch (error) {

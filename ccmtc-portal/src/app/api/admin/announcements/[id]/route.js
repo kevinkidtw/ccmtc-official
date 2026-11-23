@@ -13,6 +13,8 @@ export async function PUT(req, { params }) {
   try {
     const { id } = await params;
     const body = await req.json();
+    const current = await prisma.announcement.findUnique({ where: { id } });
+    if (!current) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     
     // If the file is being updated or removed, we could clean up the old file
     if (body.fileUrl !== undefined) {
@@ -35,6 +37,10 @@ export async function PUT(req, { params }) {
         ...(body.isPinned !== undefined && { isPinned: body.isPinned }),
         ...(body.fileUrl !== undefined && { fileUrl: body.fileUrl }),
         ...(body.fileName !== undefined && { fileName: body.fileName }),
+        // 審核教師消息：通過 → 發布（第一次發布時記錄時間）；退回 → 附上原因
+        ...(body.status === 'published' && { status: 'published', reviewNote: null, publishedAt: current?.publishedAt || new Date() }),
+        ...(body.status === 'rejected' && { status: 'rejected', reviewNote: String(body.reviewNote || '').slice(0, 500) || null }),
+        ...(body.status === 'pending' && { status: 'pending' }),
       },
     });
     return NextResponse.json(updated);

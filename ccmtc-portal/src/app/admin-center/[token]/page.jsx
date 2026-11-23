@@ -2,6 +2,9 @@
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import ResourcesAdmin from './ResourcesAdmin';
+import TeachersAdmin from './TeachersAdmin';
+import { SITES } from '@/config/sites.mjs';
+import { STATUS_LABEL } from '@/lib/newsFormat.mjs';
 
 const CATEGORIES = ['一般公告', '課程消息', '競賽資訊', '活動公告'];
 
@@ -16,7 +19,7 @@ export default function AdminCenterPage({ params }) {
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState(null);
-  const [form, setForm] = useState({ title: '', content: '', category: '一般公告', isPinned: false });
+  const [form, setForm] = useState({ title: '', content: '', category: '一般公告', isPinned: false, siteKey: '' });
   const [submitting, setSubmitting] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
 
@@ -74,7 +77,7 @@ export default function AdminCenterPage({ params }) {
     });
     setSubmitting(false);
     if (res.ok) {
-      setForm({ title: '', content: '', category: '一般公告', isPinned: false });
+      setForm({ title: '', content: '', category: '一般公告', isPinned: false, siteKey: '' });
       setSelectedFile(null);
       // Reset input element value if exists
       const fileInput = document.getElementById('file-upload-input');
@@ -96,6 +99,23 @@ export default function AdminCenterPage({ params }) {
     });
     fetchList();
   };
+
+  const review = async (item, status) => {
+    let reviewNote = '';
+    if (status === 'rejected') {
+      reviewNote = window.prompt(`退回「${item.title}」的原因（會顯示給發文教師）：`, '');
+      if (reviewNote === null) return;
+    }
+    const res = await fetch(`/api/admin/announcements/${item.id}?token=${token}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status, reviewNote }),
+    });
+    showMsg(res.ok ? (status === 'published' ? '已通過並發布' : '已退回') : '操作失敗', res.ok);
+    fetchList();
+  };
+
+  const pending = list.filter(i => i.status === 'pending');
 
   const deleteItem = async (item) => {
     if (!window.confirm(`確定要刪除「${item.title}」嗎？`)) return;
@@ -127,6 +147,40 @@ export default function AdminCenterPage({ params }) {
             color: msg.ok ? '#065f46' : '#991b1b', fontWeight: 600, fontSize: '0.9rem'
           }}>
             {msg.text}
+          </div>
+        )}
+
+        {/* Pending review */}
+        {pending.length > 0 && (
+          <div className="glass-panel" style={{ padding: '1.5rem 1.75rem', marginBottom: '2rem', border: '2px solid #fcd34d' }}>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '1rem', borderLeft: '4px solid #f59e0b', paddingLeft: 12 }}>
+              待審核的教師消息（{pending.length}）
+            </h2>
+            {pending.map(item => (
+              <details key={item.id} style={{ borderBottom: '1px solid #f1f5f9', padding: '0.75rem 0' }}>
+                <summary style={{ cursor: 'pointer', fontWeight: 700 }}>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginRight: 8 }}>{formatDate(item.updatedAt)}</span>
+                  {item.title}
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginLeft: 8 }}>— {item.authorName}</span>
+                </summary>
+                <div style={{ whiteSpace: 'pre-wrap', fontSize: '0.9rem', lineHeight: 1.7, margin: '0.75rem 0', padding: '0.75rem 1rem', background: '#f8fafc', borderRadius: 8 }}>
+                  {item.content}
+                </div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: 8 }}>
+                  分類：{item.category}
+                  {item.siteKey && <>　相關網站：{SITES.find(s => s.key === item.siteKey)?.short || item.siteKey}</>}
+                  {item.fileUrl && <>　附件：<a href={item.fileUrl} target="_blank" rel="noreferrer">{item.fileName || '開啟'}</a></>}
+                </div>
+                <button onClick={() => review(item, 'published')}
+                  style={{ marginRight: 8, padding: '6px 16px', borderRadius: 8, border: 'none', background: '#10b981', color: '#fff', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>
+                  ✓ 通過並發布
+                </button>
+                <button onClick={() => review(item, 'rejected')}
+                  style={{ padding: '6px 16px', borderRadius: 8, border: '1.5px solid rgba(239,68,68,0.5)', background: 'transparent', color: '#dc2626', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+                  退回
+                </button>
+              </details>
+            ))}
           </div>
         )}
 
@@ -245,6 +299,17 @@ export default function AdminCenterPage({ params }) {
                   {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
+              <div style={{ flex: 1, minWidth: 200 }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6 }}>相關網站（選填）</label>
+                <select
+                  value={form.siteKey}
+                  onChange={e => setForm(f => ({ ...f, siteKey: e.target.value }))}
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: '1.5px solid #e2e8f0', fontSize: '0.9rem', background: '#fff', fontFamily: 'inherit' }}
+                >
+                  <option value="">（無）</option>
+                  {SITES.map(s => <option key={s.key} value={s.key}>{s.icon} {s.short}</option>)}
+                </select>
+              </div>
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', paddingTop: 22 }}>
                 <input
                   type="checkbox"
@@ -255,7 +320,7 @@ export default function AdminCenterPage({ params }) {
                 置頂公告
               </label>
               <div style={{ display: 'flex', gap: '0.75rem', paddingTop: 22, marginLeft: 'auto' }}>
-                <button type="button" onClick={() => setForm({ title: '', content: '', category: '一般公告', isPinned: false })}
+                <button type="button" onClick={() => setForm({ title: '', content: '', category: '一般公告', isPinned: false, siteKey: '' })}
                   style={{ padding: '10px 20px', borderRadius: 10, border: '1.5px solid #e2e8f0', background: '#fff', fontSize: '0.875rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
                   清除
                 </button>
@@ -283,7 +348,7 @@ export default function AdminCenterPage({ params }) {
               <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 600 }}>
                 <thead>
                   <tr style={{ borderBottom: '2px solid var(--theme-color)' }}>
-                    {['日期', '置頂', '分類', '標題', '操作'].map(h => (
+                    {['日期', '狀態', '分類', '標題', '操作'].map(h => (
                       <th key={h} style={{ padding: '10px 12px', textAlign: 'left', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>{h}</th>
                     ))}
                   </tr>
@@ -293,7 +358,12 @@ export default function AdminCenterPage({ params }) {
                     <tr key={item.id} style={{ borderBottom: '1px solid #f1f5f9', background: item.isPinned ? 'var(--theme-lighter)' : idx % 2 === 0 ? 'transparent' : 'rgba(248,250,252,0.5)' }}>
                       <td style={{ padding: '10px 12px', fontSize: '0.8rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{formatDate(item.createdAt)}</td>
                       <td style={{ padding: '10px 12px' }}>
-                        {item.isPinned && <span style={{ background: 'var(--theme-color)', color: '#1a1a2e', fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: 999 }}>置頂</span>}
+                        {item.isPinned && <span style={{ background: 'var(--theme-color)', color: '#1a1a2e', fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: 999, marginRight: 4 }}>置頂</span>}
+                        {item.status && item.status !== 'published' && (
+                          <span style={{ background: item.status === 'pending' ? '#fef3c7' : '#fee2e2', color: item.status === 'pending' ? '#92400e' : '#991b1b', fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: 999 }}>
+                            {STATUS_LABEL[item.status] || item.status}
+                          </span>
+                        )}
                       </td>
                       <td style={{ padding: '10px 12px', fontSize: '0.8rem' }}>
                         <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: 999, fontWeight: 600, background: '#f1f5f9', color: 'var(--text-muted)' }}>{item.category}</span>
@@ -301,6 +371,7 @@ export default function AdminCenterPage({ params }) {
                       <td style={{ padding: '10px 12px', fontSize: '0.875rem', fontWeight: 500, maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {item.fileUrl && <span style={{ marginRight: 6, fontSize: '0.95rem', cursor: 'help' }} title={`附件: ${item.fileName}`}>📎</span>}
                         {item.title}
+                        {item.authorName && item.authorId && <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{item.authorName}</div>}
                       </td>
                       <td style={{ padding: '10px 12px', whiteSpace: 'nowrap' }}>
                         <button
@@ -321,6 +392,14 @@ export default function AdminCenterPage({ params }) {
             </div>
           )}
         </div>
+
+        {/* Teacher accounts */}
+        <div style={{ margin: '2.5rem 0 1rem', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ flex: 1, height: 1, background: '#e2e8f0' }} />
+          <span style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-muted)' }}>教師帳號管理</span>
+          <div style={{ flex: 1, height: 1, background: '#e2e8f0' }} />
+        </div>
+        <TeachersAdmin token={token} />
 
         {/* Course Resources Management */}
         <div style={{ margin: '2.5rem 0 1rem', display: 'flex', alignItems: 'center', gap: 12 }}>

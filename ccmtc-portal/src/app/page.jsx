@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma';
+import { getHomeNews } from '@/lib/newsQuery';
 import NavBar from './components/NavBar';
 import HeroSection from './components/HeroSection';
 import QuickAccess from './components/QuickAccess';
@@ -18,18 +18,11 @@ export default async function HomePage() {
   // 說明站、教材站、資科訓練的入口改由 src/config/sites.mjs 統一管理
 
   let announcements = [];
+  let newsTotal = 0;
   try {
-    const pinned = await prisma.announcement.findMany({
-      where: { isPinned: true },
-      orderBy: { createdAt: 'desc' },
-      take: 3,
-    });
-    const rest = await prisma.announcement.findMany({
-      where: { isPinned: false },
-      orderBy: { createdAt: 'desc' },
-      take: 7,
-    });
-    announcements = [...pinned, ...rest];
+    const home = await getHomeNews();
+    announcements = home.items;
+    newsTotal = home.total;
   } catch {
     // DB not ready yet, show empty state
   }
@@ -53,7 +46,7 @@ export default async function HomePage() {
 
       <div className="section-divider" />
 
-      <AnnouncementList announcements={announcements} />
+      <AnnouncementList announcements={announcements} total={newsTotal} />
 
       <div className="section-divider" />
 

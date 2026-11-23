@@ -11,7 +11,7 @@ export default function NavBar({ resultsUrl }) {
     { label: '課程資源', href: '/resources' },
     // 各競賽說明站、教材站、資科訓練統一收在競賽專區（清單見 src/config/sites.mjs）
     { label: '競賽專區', href: '/contests' },
-    { label: '最新消息', href: '/#news' },
+    { label: '最新消息', href: '/news' },
     { label: '服務範圍', href: '/#service-area' },
     { label: '聯絡我們', href: '/#contact' },
   ];

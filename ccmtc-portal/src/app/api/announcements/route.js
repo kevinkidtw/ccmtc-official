@@ -4,13 +4,13 @@ import { NextResponse } from 'next/server';
 export async function GET() {
   try {
     const pinned = await prisma.announcement.findMany({
-      where: { isPinned: true },
-      orderBy: { createdAt: 'desc' },
+      where: { isPinned: true, status: 'published' },
+      orderBy: { publishedAt: 'desc' },
       take: 3,
     });
     const rest = await prisma.announcement.findMany({
-      where: { isPinned: false },
-      orderBy: { createdAt: 'desc' },
+      where: { isPinned: false, status: 'published' },
+      orderBy: { publishedAt: 'desc' },
       take: 7,
     });
     return NextResponse.json([...pinned, ...rest]);

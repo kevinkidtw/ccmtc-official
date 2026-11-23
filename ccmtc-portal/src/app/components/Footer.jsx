@@ -59,7 +59,7 @@ export default function Footer({ resultsUrl }) {
               <a href="/#about" className="footer-link">關於中心</a>
               <a href="/#courses" className="footer-link">課程服務</a>
               <a href="/resources" className="footer-link">課程資源</a>
-              <a href="/#news" className="footer-link">最新消息</a>
+              <a href="/news" className="footer-link">最新消息</a>
               <a href="/#service-area" className="footer-link">服務範圍</a>
               <a href="/#contact" className="footer-link">聯絡我們</a>
             </div>

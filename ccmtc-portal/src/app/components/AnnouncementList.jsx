@@ -1,11 +1,12 @@
 'use client';
 import { useState } from 'react';
+import { renderContent, displayDate } from '@/lib/newsFormat.mjs';
 
 function formatDate(d) {
   return new Date(d).toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit' });
 }
 
-export default function AnnouncementList({ announcements }) {
+export default function AnnouncementList({ announcements, total = 0 }) {
   const [openId, setOpenId] = useState(null);
 
   const toggle = (id) => setOpenId(prev => prev === id ? null : id);
@@ -28,14 +29,20 @@ export default function AnnouncementList({ announcements }) {
               return (
                 <div key={item.id} className="news-item">
                   <div className="news-item-header" onClick={() => toggle(item.id)}>
-                    <span className="news-date">{formatDate(item.createdAt)}</span>
+                    <span className="news-date">{formatDate(displayDate(item))}</span>
                     {item.isPinned && <span className="news-pin-badge">置頂</span>}
                     <span className={`news-cat-badge cat-${item.category}`}>{item.category}</span>
                     <span className="news-title">{item.title}</span>
                     <span className={`news-chevron${isOpen ? ' open' : ''}`}>▾</span>
                   </div>
                   <div className={`news-item-body${isOpen ? ' open' : ''}`}>
-                    <div style={{ whiteSpace: 'pre-wrap' }} dangerouslySetInnerHTML={{ __html: item.content }} />
+                    {item.authorName && (
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>發布：{item.authorName}</div>
+                    )}
+                    <div style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }} dangerouslySetInnerHTML={{ __html: renderContent(item) }} />
+                    <a href={`/news/${item.id}`} style={{ display: 'inline-block', marginTop: '0.9rem', fontSize: '0.85rem', fontWeight: 700, color: 'var(--theme-dark)' }}>
+                      單篇頁面（可分享）→
+                    </a>
                     {item.fileUrl && (
                       <div style={{
                         marginTop: '1.25rem',
@@ -105,6 +112,11 @@ export default function AnnouncementList({ announcements }) {
               );
             })
           )}
+          <div style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>
+            <a href="/news" style={{ fontWeight: 800, color: 'var(--theme-dark)', textDecoration: 'none' }}>
+              看全部消息{total ? `（${total} 則）` : ''} →
+            </a>
+          </div>
         </div>
 
         <div className="news-sidebar">
@@ -112,6 +124,10 @@ export default function AnnouncementList({ announcements }) {
           <p>
             請定期關注本中心最新公告，掌握課程報名、競賽資訊與活動消息，
             歡迎各校師長轉知同仁與學生。
+          </p>
+          <p style={{ marginTop: '0.75rem' }}>
+            屏南地區教師可申請帳號，自行發布課程與活動消息：
+            <a href="/news-admin" style={{ fontWeight: 800, color: 'inherit' }}>教師發布消息 →</a>
           </p>
           <div className="news-sidebar-contact">
             📞 08-882-1045 分機19<br />

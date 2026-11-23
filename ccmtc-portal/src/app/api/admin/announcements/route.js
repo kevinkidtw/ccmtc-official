@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
+import { getSite } from '@/config/sites.mjs';
 
 function isValidToken(req) {
   const token = req.nextUrl.searchParams.get('token');
@@ -21,7 +22,7 @@ export async function GET(req) {
 export async function POST(req) {
   if (!isValidToken(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   try {
-    const { title, content, category, isPinned, fileUrl, fileName } = await req.json();
+    const { title, content, category, isPinned, fileUrl, fileName, siteKey } = await req.json();
     if (!title?.trim() || !content?.trim()) {
       return NextResponse.json({ error: '標題與內容為必填' }, { status: 400 });
     }
@@ -33,6 +34,11 @@ export async function POST(req) {
         isPinned: !!isPinned,
         fileUrl: fileUrl || null,
         fileName: fileName || null,
+        status: 'published',
+        contentFormat: 'html',
+        publishedAt: new Date(),
+        siteKey: siteKey && getSite(siteKey) ? siteKey : null,
+        authorName: '車城自造教育科技中心',
       },
     });
     return NextResponse.json(item, { status: 201 });

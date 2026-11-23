@@ -96,3 +96,13 @@ sudo docker-compose logs -f competition
 * **屏南區智創機器人競賽封存（2026-11-18）**：`ccmtc-competition` 容器已下線並移出 compose，`/competition/` 改由 `guides` 容器內的凍結鏡像提供（唯讀，網址不變，選手姓名遮蔽）。首頁的「競賽即時計分」「競賽資訊入口」卡片撤下，Hero 按鈕與頁尾改連競賽專區，競賽專區 114 學年度標示「已封存」。程式與資料庫保留在 NAS 的 `ccmtc-competition/`，備份在 `ccmtc-backups-safety/`。詳見 `../ccmtc-guides/README.md`「封存鏡像」。
 * **競賽專區分區（2026-11-18）**：`sites.mjs` 每站加上 `role`。`host`＝中心辦理的競賽（主辦或承辦，`hostType` 決定徽章「中心主辦／中心承辦」），`team`＝中心隊伍參賽用的培訓與程式說明。`/contests` 依此分成兩區，各區再依學年度分組。目前中心辦理：屏南區智創機器人競賽（主辦，已封存）；參賽培訓與程式說明：無人機（中心雖列承辦單位之一，但非主要角色）、智創機器人、機關王 R4M、魷來魷去、資科競賽訓練。新增站台時務必填 `role`（單元測試會檢查）。
 * **靜態容器合併（2026-11-23）**：`robot-guide`、`r4m-guide`、`squid-portal` 三個 nginx 容器併入 `guides`，`sites.mjs` 三站 `upstream` 改為 `'guides'`，compose 移除這三個服務。官網相關容器剩 `portal`、`results`、`guides` 三個。
+
+### 6. 最新消息與教師發文後台（2026/11/23 新增）
+
+* **公開頁面**：`/news` 列表（分類篩選、分頁）、`/news/<id>` 單篇頁（可分享、有預覽資訊）。首頁「最新消息」只顯示最新 9 則並連到 `/news`；導覽列與頁尾的「最新消息」改連 `/news`。
+* **教師後台**：`/news-admin`。教師用帳號密碼登入，可發文、上傳附件（20 MB，僅 PDF／Office／圖片／ZIP，不收 SVG／HTML）、修改／刪除自己的消息、修改自己的密碼。教師的內文一律以純文字處理（跳脫 HTML、網址自動轉連結），不能置頂。
+* **帳號與審核**：管理者在 `/admin-center/<ADMIN_TOKEN>` 底部「教師帳號管理」建立帳號。初始密碼由伺服器隨機產生、只顯示一次，請轉交教師本人。勾「直接發布」的帳號發文立即上線；其餘進入後台最上方「待審核」，按「通過並發布」或「退回」（可附原因，教師端看得到）。帳號不刪除只停用；重設密碼或停用後，該教師所有登入立即失效。
+* **管理者公告**：仍在 `/admin-center` 發，維持可貼 HTML（例如榮譽榜公告），另可選「相關網站」（`sites.mjs` 的站），單篇頁會顯示前往該站的卡片。
+* **資料表**：`Announcement` 新增 `status`、`contentFormat`、`siteKey`、`authorId`、`authorName`、`reviewNote`、`publishedAt`；新增 `Teacher`。由 `migrate.js` 於容器啟動時自動補欄位，既有公告視為已發布的 HTML。上線前資料庫備份：`ccmtc-backups-safety/ccmtc-portal-dev.db.before-news-20261123-1456`。
+* **安全設計**：密碼以 scrypt 加鹽雜湊；登入狀態是 HMAC 簽章 cookie（HttpOnly、SameSite=Lax、7 天），金鑰由既有 `ADMIN_TOKEN` 衍生，不需新增 `.env` 設定（改 `ADMIN_TOKEN` 會讓所有教師登入失效）；寫入 API 檢查同源；登入失敗 15 分鐘內同 IP＋帳號 5 次即暫停。
+* **測試**：`npm test` 含 `tests/news.test.mjs`（密碼、session、內文跳脫、附件白名單、輸入驗證）。

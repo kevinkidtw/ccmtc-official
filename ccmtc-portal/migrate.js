@@ -38,6 +38,32 @@ try {
   addColumn('Announcement', 'fileUrl', "TEXT");
   addColumn('Announcement', 'fileName', "TEXT");
 
+  // 2026-11-23 最新消息後台（教師發文與審核）。既有公告視為管理者發的 HTML、已發布。
+  addColumn('Announcement', 'status', "TEXT NOT NULL DEFAULT 'published'");
+  addColumn('Announcement', 'contentFormat', "TEXT NOT NULL DEFAULT 'html'");
+  addColumn('Announcement', 'siteKey', "TEXT");
+  addColumn('Announcement', 'authorId', "TEXT");
+  addColumn('Announcement', 'authorName', "TEXT");
+  addColumn('Announcement', 'reviewNote', "TEXT");
+  addColumn('Announcement', 'publishedAt', "DATETIME");
+  db.prepare(`UPDATE "Announcement" SET "publishedAt" = "createdAt" WHERE "publishedAt" IS NULL AND "status" = 'published'`).run();
+
+  console.log('[migrate] Creating Teacher table if not exists...');
+  db.prepare(`
+    CREATE TABLE IF NOT EXISTS "Teacher" (
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "username" TEXT NOT NULL UNIQUE,
+      "name" TEXT NOT NULL,
+      "school" TEXT,
+      "passwordHash" TEXT NOT NULL,
+      "canPublish" INTEGER NOT NULL DEFAULT 0,
+      "isActive" INTEGER NOT NULL DEFAULT 1,
+      "lastLoginAt" DATETIME,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+  `).run();
+
   console.log('[migrate] Creating Counter table if not exists...');
   db.prepare(`
     CREATE TABLE IF NOT EXISTS "Counter" (

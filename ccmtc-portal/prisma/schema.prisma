@@ -14,8 +14,29 @@ model Announcement {
   isPinned  Boolean  @default(false)
   fileUrl   String?
   fileName  String?
+  // 2026-11-23 最新消息後台：教師發文、審核、綁定站台
+  status        String    @default("published") // published | pending | rejected
+  contentFormat String    @default("html")      // html（管理者）| text（教師，一律跳脫）
+  siteKey       String?                         // 對應 src/config/sites.mjs 的 key
+  authorId      String?
+  authorName    String?
+  reviewNote    String?
+  publishedAt   DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Teacher {
+  id           String    @id @default(cuid())
+  username     String    @unique
+  name         String
+  school       String?
+  passwordHash String
+  canPublish   Boolean   @default(false) // true：發文直接上線；false：送管理者審核
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
 
 model CourseResource {
